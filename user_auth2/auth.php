@@ -1,10 +1,9 @@
 <?php
-// User registration
+// Function to register a new user
 function registerUser($username, $password)
 {
+    // Check if the username already exists
     $users = getUsers();
-
-    // Check if the username is already taken
     foreach ($users as $user) {
         if ($user['username'] === $username) {
             return false;
@@ -14,21 +13,22 @@ function registerUser($username, $password)
     // Hash the password
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // Add the user to the users array
+    // Save the new user to the users array
     $users[] = [
         'username' => $username,
         'password' => $hashedPassword
     ];
 
-    // Save the updated users array to file
+    // Save the updated users array to the file
     saveUsers($users);
 
     return true;
 }
 
-// User authentication
+// Function to authenticate a user
 function authenticateUser($username, $password)
 {
+    // Retrieve the list of registered users
     $users = getUsers();
 
     // Find the user by username
@@ -44,7 +44,7 @@ function authenticateUser($username, $password)
     return false;
 }
 
-// Get users from file
+// Function to retrieve the list of registered users
 function getUsers()
 {
     $usersFile = 'users.txt';
@@ -63,7 +63,7 @@ function getUsers()
     return $users ?: [];
 }
 
-// Save users to file
+// Function to save the list of registered users to file
 function saveUsers($users)
 {
     $usersFile = 'users.txt';
@@ -81,74 +81,57 @@ session_start();
 // Check if the user is already logged in
 if (isset($_SESSION['username'])) {
     $username = $_SESSION['username'];
-    echo "Welcome back, $username!";
+    echo "You are already logged in as $username.";
     echo PHP_EOL;
-    echo "To logout, type 'logout'";
+    echo "To logout, press 1.";
     echo PHP_EOL;
-    exit();
-}
-
-// Process user actions
-if (isset($argv[1])) {
-    $command = $argv[1];
-
-    if ($command === 'register') {
-        if (isset($argv[2]) && isset($argv[3])) {
-            $username = $argv[2];
-            $password = $argv[3];
-
-            if (registerUser($username, $password)) {
-                echo "Registration successful! You can now login with your credentials.";
-                echo PHP_EOL;
-            } else {
-                echo "Username is already taken. Please choose a different username.";
-                echo PHP_EOL;
-            }
-        } else {
-            echo "Please provide a username and password for registration.";
-            echo PHP_EOL;
-        }
-    } elseif ($command === 'login') {
-        if (isset($argv[2]) && isset($argv[3])) {
-            $username = $argv[2];
-            $password = $argv[3];
-
-            if (authenticateUser($username, $password)) {
-                $_SESSION['username'] = $username;
-                echo "Login successful! Welcome, $username!";
-                echo PHP_EOL;
-                echo "To logout, type 'logout'";
-                echo PHP_EOL;
-            } else {
-                echo "Invalid username or password. Please try again.";
-                echo PHP_EOL;
-            }
-        } else {
-            echo "Please provide a username and password for login.";
-            echo PHP_EOL;
-        }
-    } elseif ($command === 'logout') {
-        echo "You are not currently logged in.";
-        echo PHP_EOL;
-    } else {
-        echo "Invalid command.";
-        echo PHP_EOL;
-        echo "Usage:";
-        echo PHP_EOL;
-        echo "To register: php auth.php register <username> <password>";
-        echo PHP_EOL;
-        echo "To login: php auth.php login <username> <password>";
-        echo PHP_EOL;
-    }
 } else {
-    echo "Invalid command.";
-    echo PHP_EOL;
-    echo "Usage:";
-    echo PHP_EOL;
-    echo "To register: php auth.php register <username> <password>";
-    echo PHP_EOL;
-    echo "To login: php auth.php login <username> <password>";
-    echo PHP_EOL;
+    // Process user commands
+    if (isset($argv[1])) {
+        $command = $argv[1];
+
+        if ($command === 'register') {
+            if (isset($argv[2]) && isset($argv[3])) {
+                $username = $argv[2];
+                $password = $argv[3];
+
+                if (registerUser($username, $password)) {
+                    echo "Registration successful! You can now login with your credentials.";
+                } else {
+                    echo "Username already exists. Please choose a different username.";
+                }
+            } else {
+                echo "Please provide a username and password for registration.";
+            }
+        } elseif ($command === 'login') {
+            if (isset($argv[2]) && isset($argv[3])) {
+                $username = $argv[2];
+                $password = $argv[3];
+
+                if (authenticateUser($username, $password)) {
+                    $_SESSION['username'] = $username;
+                    echo "Login successful! Welcome, $username!";
+                    echo PHP_EOL;
+                } else {
+                    echo "Invalid username or password. Please try again.";
+                }
+            } else {
+                echo "Please provide a username and password for login.";
+            }
+        } else {
+            echo "Invalid command.";
+        }
+    } else {
+        echo "Please provide a command.";
+    }
 }
-?>
-    
+
+// Handle logout option
+if (isset($_SESSION['username']) && isset($argv[1]) && $argv[1] === '1') {
+    session_destroy();
+    echo "You have been logged out.";
+}
+
+echo PHP_EOL;
+echo "Press any key to exit...";
+fgets(STDIN);
