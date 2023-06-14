@@ -13,24 +13,32 @@ $options = [
 
 $responses = [];
 
-foreach ($questions as $key => $question) {
-    echo $question . PHP_EOL;
-    $questionKey = 'Q' . ($key + 1);
-    $questionOptions = $options[$questionKey] ?? null;
-    if (!$questionOptions) {
-        echo "Options for question $questionKey not found." . PHP_EOL;
-        continue;
-    }
-    foreach ($questionOptions as $optionKey => $optionValue) {
-        echo $optionKey . '. ' . $optionValue . PHP_EOL;
-    }
+while (true) {
+    foreach ($questions as $key => $question) {
+        echo $question . PHP_EOL;
+        $questionKey = 'Q' . ($key + 1);
+        $questionOptions = $options[$questionKey] ?? null;
+        if (!$questionOptions) {
+            echo "Options for question $questionKey not found." . PHP_EOL;
+            continue;
+        }
+        foreach ($questionOptions as $optionKey => $optionValue) {
+            echo $optionKey . '. ' . $optionValue . PHP_EOL;
+        }
 
-    $response = '';
-    while (!array_key_exists($response, $questionOptions)) {
-        echo 'Your choice: ';
+        echo 'Enter your choice (or enter "quit" to exit): ';
         $response = trim(fgets(STDIN));
+        if ($response === 'quit') {
+            break 2; // Break out of both loops and exit the survey
+        }
+
+        if (!array_key_exists($response, $questionOptions)) {
+            echo 'Invalid choice. Please try again.' . PHP_EOL;
+            continue;
+        }
+
+        $responses[] = [$questionKey => $response];
     }
-    $responses[] = [$questionKey => $response];
 }
 
 $statistics = [];
