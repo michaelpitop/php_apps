@@ -30,33 +30,20 @@ foreach ($questions as $key => $question) {
         echo 'Your choice: ';
         $response = trim(fgets(STDIN));
     }
-    $responses[] = $questionOptions[$response];
+    $responses[] = [$questionKey => $response];
 }
+
 $statistics = [];
 foreach ($options as $questionKey => $questionOptions) {
-    $questionStats = 0;
-    foreach ($responses as $response) {
-        if (isset($response[$questionKey - 1]) && $response[$questionKey - 1] == 1) {
-            $questionStats++;
-        }
-    }
+    $questionStats = array_count_values(array_column($responses, $questionKey));
     $statistics[$questionKey] = $questionStats;
 }
 
 echo PHP_EOL . 'Survey Statistics:' . PHP_EOL;
 foreach ($statistics as $questionKey => $questionStats) {
-    $questionOptions = $options[$questionKey];
-    echo $questions[$questionKey - 1] . PHP_EOL;
-    $totalResponses = count($responses);
-    foreach ($questionOptions as $optionKey => $optionValue) {
-        $percentage = $totalResponses ? ($questionStats / $totalResponses) * 100 : 0;
-        echo $optionKey . '. ' . $optionValue . ': ' . $percentage . '%' . PHP_EOL;
+    echo $questions[(int)substr($questionKey, 1) - 1] . PHP_EOL;
+    foreach ($questionStats as $optionKey => $count) {
+        echo $optionKey . '. ' . $options[$questionKey][$optionKey] . ': ' . $count . PHP_EOL;
     }
 }
-
-
-
-
-
-
 ?>
